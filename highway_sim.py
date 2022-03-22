@@ -1,5 +1,8 @@
 import random
 
+import os
+import time
+
 """
 2PX3 Highway Simulation Starting Code 
 
@@ -74,18 +77,44 @@ class Highway:
 
     def print(self):
         s = "\n"
+        
+        for i in range(self.length):
+            s += "="
+        
+        s += "\n"
+        
         for i in range(self.length):
             if self.road[0][i] == EMPTY:
-                s += "_"
+                s += " "
             else:
-                s += "C"
+                s += str(self.get(0, i).speed)
         s += "\n"
+
+        for i in range(self.length):
+            if i%2 == 0:
+                s += " "
+            else:
+                s += "-"
+
+        s += "\n"
+        
         for i in range(self.length):
             if self.road[1][i] == EMPTY:
-                s += "_"
+                s += " "
             else:
-                s += "C"
+                s += str(self.get(1, i).speed)
+
+        s += "\n"
+
+        for i in range(self.length):
+            s += "="
+        
+        s += "\n"
+        
+        os.system("cls")
         print(s)
+        time.sleep(0.02)
+        
 
 
 class Simulation:
@@ -180,22 +209,8 @@ class Simulation:
     def average_time(self):
         return sum(self.data)/len(self.data)
 
-
-            
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-        
-
-    
+if __name__ == "__main__":
+    x = input("Number of simulations: ")
+    sim = Simulation(int(x))
+    sim.run()
+    print(sim.average_time())
