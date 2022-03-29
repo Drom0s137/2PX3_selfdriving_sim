@@ -1,5 +1,8 @@
 import random
 
+import os
+import time
+
 """
 2PX3 Highway Simulation Starting Code 
 
@@ -66,26 +69,49 @@ class Highway:
             x += 1
         return x
 
-    def safe_right_lane_change(self, i):
-        return self.road[RIGHT][i] == EMPTY and self.road[RIGHT][i+1] == EMPTY and self.road[RIGHT][i+2] == EMPTY
-
-    def safe_left_lane_change(self, i):
-        return self.road[LEFT][i] == EMPTY and self.road[LEFT][i+1] == EMPTY and self.road[LEFT][i+2] == EMPTY
+    def safe_lane_change(self, lane, i):
+        return self.road[lane][i] == EMPTY and self.road[lane][i+1] == EMPTY and self.road[lane][i+2] == EMPTY
 
     def print(self):
         s = "\n"
+        
+        for i in range(self.length):
+            s += "="
+        
+        s += "\n"
+        
         for i in range(self.length):
             if self.road[0][i] == EMPTY:
-                s += "_"
+                s += " "
             else:
-                s += "C"
+                s += str(self.get(0, i).speed)
         s += "\n"
+
+        for i in range(self.length):
+            if i%2 == 0:
+                s += " "
+            else:
+                s += "-"
+
+        s += "\n"
+        
         for i in range(self.length):
             if self.road[1][i] == EMPTY:
-                s += "_"
+                s += " "
             else:
-                s += "C"
+                s += str(self.get(1, i).speed)
+
+        s += "\n"
+
+        for i in range(self.length):
+            s += "="
+        
+        s += "\n"
+        
+        os.system("cls")
         print(s)
+        time.sleep(0.02)
+        
 
 
 class Simulation:
@@ -119,7 +145,7 @@ class Simulation:
             return #Car reaches the end of the highway
 
         if driver.desire == LANE_CHANGE:
-            if self.road.safe_left_lane_change(i):
+            if self.road.safe_lane_change(LEFT, i):
                 self.road.set(LEFT, i, driver)
                 self.road.set(RIGHT, i, EMPTY)
                 driver.desire = CRUISE
@@ -137,7 +163,7 @@ class Simulation:
             return #Car reaches the end of the highway
 
         if driver.desire == LANE_CHANGE:
-            if self.road.safe_right_lane_change(i):
+            if self.road.safe_lane_change(RIGHT, i):
                 self.road.set(RIGHT, i, driver)
                 self.road.set(LEFT, i, EMPTY)
                 driver.desire = CRUISE
@@ -146,7 +172,6 @@ class Simulation:
                 self.sim_cruise(LEFT, i)
         elif driver.desire == CRUISE:
             self.sim_cruise(LEFT, i)
-            
 
     def sim_cruise(self, lane, i):
         driver = self.road.get(lane, i)
@@ -180,22 +205,8 @@ class Simulation:
     def average_time(self):
         return sum(self.data)/len(self.data)
 
-
-def main ():
-    sim = Simulation(100)
+if __name__ == "__main__":
+    x = input("Number of simulations: ")
+    sim = Simulation(int(x))
     sim.run()
     print(sim.average_time())
-
-
-if __name__ == "__main__":
-    main()
-
-
-
-
-
-        
-            
-        
-
-    
