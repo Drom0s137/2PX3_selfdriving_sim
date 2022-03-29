@@ -27,7 +27,7 @@ LANE_CHANGE = "Lane Change"
 OFFSET = 5 #The last OFFSET indices of the road are not considered to avoid out of bounds errors
 CAR_PROBABILITY = 0.25
 FAST_PROBABILITY = 0.5
-HUMAN_PROBABILITY = 0.4
+HUMAN_PROBABILITY = 0.2
 IRREGULAR_PROBABILITY = 0.1
 PRINT_ROAD = True
 HIGHWAY_LENGTH = 150
@@ -84,10 +84,14 @@ class Highway:
         s += "\n"
         
         for i in range(self.length):
+            driver = self.get(LEFT, i)
             if self.road[0][i] == EMPTY:
                 s += " "
             else:
-                s += str(self.get(0, i).speed)
+                a = "H"
+                if driver.autonomous:
+                    a = "A"
+                s += str(self.get(0, i).speed)+a
         s += "\n"
 
         for i in range(self.length):
@@ -99,10 +103,14 @@ class Highway:
         s += "\n"
         
         for i in range(self.length):
+            driver = self.get(RIGHT, i)
             if self.road[1][i] == EMPTY:
                 s += " "
             else:
-                s += str(self.get(1, i).speed)
+                a = "H"
+                if driver.autonomous:
+                    a = "A"
+                s += str(self.get(1, i).speed)+a
 
         s += "\n"
 
@@ -113,7 +121,7 @@ class Highway:
         
         #os.system("clear")
         print(s)
-        time.sleep(0.02)
+        time.sleep(0.5)
         
 
 
@@ -179,7 +187,7 @@ class Simulation:
     def sim_cruise(self, lane, i):
         driver = self.road.get(lane, i)
         #implement human drive behaviour
-        if driver.autonomous == False:          
+        if driver.autonomous == False:         
             x = self.road.safe_distance_within(lane, i, driver.speed + driver.safe_follow)
             if x == driver.speed + driver.safe_follow:
                 self.road.set(lane, i + driver.speed, driver) #Car moves forward by full speed
@@ -192,9 +200,10 @@ class Simulation:
             self.road.set(lane, i, EMPTY)
         #implement autonomous drive behaviour
         else:
+            #print("adsfsdfasdfadssssssssss")
             x = self.road.safe_distance_within(lane, i, driver.speed + driver.safe_follow)
             #behaviour: if left or right side parallel has a car, slow down until they are not parallel
-            if (lane == RIGHT):
+            '''if (lane == RIGHT):
                 if self.road.get(LEFT, i) != EMPTY:
                     self.speed -= 1
                 else:
@@ -204,11 +213,28 @@ class Simulation:
                     self.speed -= 1
                 else:
                     self.speed = driver.speed
+            '''
             #behaviour: if there is a car in 2 distanc ebhind with a faster speed, make way for it by changing lanes
             if (lane == LEFT):
-                driver_behind = self.road.get(LEFT, i)
-                if (driver_behind != EMPTY and driver_behind.speed > driver.speed):
+                driver_behind = self.road.get(LEFT, i-1)
+            else:
+                driver_behind = self.road.get(RIGHT, i-1)
+            if (driver_behind != EMPTY and driver_behind.speed > driver.speed):
+                if x > driver.safe_follow:
                     driver.desire = LANE_CHANGE
+                    self.road.set(lane, i + x - driver.safe_follow, driver)
+                else:
+                    driver.desire = LANE_CHANGE
+                    self.road.set(lane, i + 1, driver) #Car moves forward by just 1 spot
+            else:
+                if x == driver.speed + driver.safe_follow:
+                    self.road.set(lane, i + driver.speed, driver) #Car moves forward by full speed
+                elif x > driver.safe_follow:
+                    #driver.desire = LANE_CHANGE
+                    self.road.set(lane, i + x - driver.safe_follow, driver) #Car moves forward just enough to maintain safe_distance
+                else:
+                    #driver.desire = LANE_CHANGE
+                    self.road.set(lane, i + 1, driver) #Car moves forward by just 1 spot
             self.road.set(lane, i, EMPTY)
 
 
@@ -217,25 +243,31 @@ class Simulation:
         if r < CAR_PROBABILITY:
             r = random.random()
             if r < FAST_PROBABILITY:
-                print("FAST")
-                r = random.random()
-                if r < HUMAN_PROBABILITY:
-                    self.road.set(LEFT, 0, Driver(FAST, self.current_step, True))
-            else:
-                print("SLOW")
                 r = random.random()
                 if r > HUMAN_PROBABILITY:
+                    self.road.set(LEFT, 0, Driver(FAST, self.current_step, True))
+                else:
+                    self.road.set(LEFT, 0, Driver(FAST, self.current_step, False))
+            else:
+                r = random.random()
+                if r > HUMAN_PROBABILITY:
+                    self.road.set(LEFT, 0, Driver(SLOW, self.current_step, True))
+                else:
                     self.road.set(LEFT, 0, Driver(SLOW, self.current_step, False))
         r = random.random()
         if r < CAR_PROBABILITY:
             r = random.random()
             if r < FAST_PROBABILITY:
                 r = random.random()
-                if r < HUMAN_PROBABILITY:
+                if r > HUMAN_PROBABILITY:
                     self.road.set(RIGHT, 0, Driver(FAST, self.current_step, True))
+                else:
+                    self.road.set(RIGHT, 0, Driver(FAST, self.current_step, False))
             else:
                 r = random.random()
                 if r > HUMAN_PROBABILITY:
+                    self.road.set(RIGHT, 0, Driver(SLOW, self.current_step, True))
+                else:
                     self.road.set(RIGHT, 0, Driver(SLOW, self.current_step, False))
 
     def average_time(self):
