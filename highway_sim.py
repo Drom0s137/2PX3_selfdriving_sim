@@ -29,15 +29,20 @@ CAR_PROBABILITY = 0.25
 FAST_PROBABILITY = 0.5
 PRINT_ROAD = True
 HIGHWAY_LENGTH = 150
+AUTONOMOUS_SPEED = 4
 
 class Driver:
 
-    def __init__(self, speed, arrive_time):
-        self.speed = speed
+    def __init__(self, speed, arrive_time, autonomous):
+        if not autonomous:
+            self.speed = speed
+        else:
+            self.speed = AUTONOMOUS_SPEED
         self.safe_follow = SAFE_FOLLOW
         self.desire = CRUISE
         self.arrive_time = arrive_time
-        
+        self.autonomous = autonomous
+
 
 
 class Highway:
@@ -155,6 +160,9 @@ class Simulation:
         elif driver.desire == CRUISE:
             self.sim_cruise(RIGHT, i)
 
+        if driver.autonomous:
+            self.clear_roadway(self, RIGHT, i)
+
     def sim_left_driver(self, i):
         driver = self.road.get(LEFT, i)
         if driver.speed + i >= self.road.length - 1:
@@ -173,6 +181,9 @@ class Simulation:
         elif driver.desire == CRUISE:
             self.sim_cruise(LEFT, i)
 
+        if driver.autonomous:
+            self.clear_roadway(self, LEFT, i)
+
     def sim_cruise(self, lane, i):
         driver = self.road.get(lane, i)
         x = self.road.safe_distance_within(lane, i, driver.speed + driver.safe_follow)
@@ -185,6 +196,20 @@ class Simulation:
             driver.desire = LANE_CHANGE
             self.road.set(lane, i + 1, driver) #Car moves forward by just 1 spot
         self.road.set(lane, i, EMPTY)
+
+    def clear_roadway(self, lane, i):
+        if (lane == RIGHT):
+            if self.road.get(LEFT, i) != EMPTY:
+                self.speed -= 1
+            else:
+                self.speed = AUTONOMOUS_SPEED
+        elif (lane == LEFT):
+            if self.road.get(RIGHT, i) != EMPTY:
+                self.speed -= 1
+            else:
+                self.speed = AUTONOMOUS_SPEED
+
+
 
     def gen_new_drivers(self):
         r = random.random()
