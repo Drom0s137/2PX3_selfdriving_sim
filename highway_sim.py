@@ -121,7 +121,7 @@ class Highway:
         
         #os.system("clear")
         print(s)
-        time.sleep(0.5)
+        time.sleep(0.02)
         
 
 
@@ -203,7 +203,7 @@ class Simulation:
             #print("adsfsdfasdfadssssssssss")
             x = self.road.safe_distance_within(lane, i, driver.speed + driver.safe_follow)
             #behaviour: if left or right side parallel has a car, slow down until they are not parallel
-            '''if (lane == RIGHT):
+            if (lane == RIGHT):
                 if self.road.get(LEFT, i) != EMPTY:
                     self.speed -= 1
                 else:
@@ -213,7 +213,7 @@ class Simulation:
                     self.speed -= 1
                 else:
                     self.speed = driver.speed
-            '''
+        
             #behaviour: if there is a car in 2 distanc ebhind with a faster speed, make way for it by changing lanes
             if (lane == LEFT):
                 driver_behind = self.road.get(LEFT, i-1)
