@@ -25,7 +25,7 @@ RIGHT = 1
 CRUISE = "Cruise"
 LANE_CHANGE = "Lane Change"
 OFFSET = 5 #The last OFFSET indices of the road are not considered to avoid out of bounds errors
-CAR_PROBABILITY = 0.25
+CAR_PROBABILITY = 0.7
 FAST_PROBABILITY = 0.5
 HUMAN_PROBABILITY = 0.3
 IRREGULAR_PROBABILITY = 0.1
@@ -193,15 +193,24 @@ class Simulation:
         #implement autonomous drive behaviour
         else:
             x = self.road.safe_distance_within(lane, i, driver.speed + driver.safe_follow)
-            if x == driver.speed + driver.safe_follow:
-                self.road.set(lane, i + driver.speed, driver) #Car moves forward by full speed
-            elif x > driver.safe_follow:
-                driver.desire = LANE_CHANGE
-                self.road.set(lane, i + x - driver.safe_follow, driver) #Car moves forward just enough to maintain safe_distance
-            else:
-                driver.desire = LANE_CHANGE
-                self.road.set(lane, i + 1, driver) #Car moves forward by just 1 spot
+            #behaviour: if left or right side parallel has a car, slow down until they are not parallel
+            if (lane == RIGHT):
+                if self.road.get(LEFT, i) != EMPTY:
+                    self.speed -= 1
+                else:
+                    self.speed = driver.speed
+            elif (lane == LEFT):
+                if self.road.get(RIGHT, i) != EMPTY:
+                    self.speed -= 1
+                else:
+                    self.speed = driver.speed
+            #behaviour: if there is a car in 2 distanc ebhind with a faster speed, make way for it by changing lanes
+            if (lane == LEFT):
+                driver_behind = self.road.get(LEFT, i-1)
+                if (driver_behind != EMPTY and driver_behind.speed > driver.speed):
+                    driver.desire = LANE_CHANGE
             self.road.set(lane, i, EMPTY)
+
 
     def gen_new_drivers(self):
         r = random.random()
