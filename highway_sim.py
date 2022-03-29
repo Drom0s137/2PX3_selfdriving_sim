@@ -25,7 +25,7 @@ RIGHT = 1
 CRUISE = "Cruise"
 LANE_CHANGE = "Lane Change"
 OFFSET = 5 #The last OFFSET indices of the road are not considered to avoid out of bounds errors
-CAR_PROBABILITY = 0.7
+CAR_PROBABILITY = 0.25
 FAST_PROBABILITY = 0.5
 HUMAN_PROBABILITY = 0.3
 IRREGULAR_PROBABILITY = 0.1
@@ -206,7 +206,7 @@ class Simulation:
                     self.speed = driver.speed
             #behaviour: if there is a car in 2 distanc ebhind with a faster speed, make way for it by changing lanes
             if (lane == LEFT):
-                driver_behind = self.road.get(LEFT, i-1)
+                driver_behind = self.road.get(LEFT, i)
                 if (driver_behind != EMPTY and driver_behind.speed > driver.speed):
                     driver.desire = LANE_CHANGE
             self.road.set(lane, i, EMPTY)
