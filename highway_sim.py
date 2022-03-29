@@ -27,17 +27,20 @@ LANE_CHANGE = "Lane Change"
 OFFSET = 5 #The last OFFSET indices of the road are not considered to avoid out of bounds errors
 CAR_PROBABILITY = 0.25
 FAST_PROBABILITY = 0.5
+HUMAN_PROBABILITY = 0.3
+IRREGULAR_PROBABILITY = 0.1
 PRINT_ROAD = True
 HIGHWAY_LENGTH = 150
 
 class Driver:
 
-    def __init__(self, speed, arrive_time):
+    def __init__(self, speed, arrive_time, autonomous):
+
         self.speed = speed
         self.safe_follow = SAFE_FOLLOW
         self.desire = CRUISE
         self.arrive_time = arrive_time
-        
+        self.autonomous = autonomous
 
 
 class Highway:
@@ -175,32 +178,54 @@ class Simulation:
 
     def sim_cruise(self, lane, i):
         driver = self.road.get(lane, i)
-        x = self.road.safe_distance_within(lane, i, driver.speed + driver.safe_follow)
-        if x == driver.speed + driver.safe_follow:
-            self.road.set(lane, i + driver.speed, driver) #Car moves forward by full speed
-        elif x > driver.safe_follow:
-            driver.desire = LANE_CHANGE
-            self.road.set(lane, i + x - driver.safe_follow, driver) #Car moves forward just enough to maintain safe_distance
+        #implement human drive behaviour
+        if driver.autonomous == False:          
+            x = self.road.safe_distance_within(lane, i, driver.speed + driver.safe_follow)
+            if x == driver.speed + driver.safe_follow:
+                self.road.set(lane, i + driver.speed, driver) #Car moves forward by full speed
+            elif x > driver.safe_follow:
+                driver.desire = LANE_CHANGE
+                self.road.set(lane, i + x - driver.safe_follow, driver) #Car moves forward just enough to maintain safe_distance
+            else:
+                driver.desire = LANE_CHANGE
+                self.road.set(lane, i + 1, driver) #Car moves forward by just 1 spot
+            self.road.set(lane, i, EMPTY)
+        #implement autonomous drive behaviour
         else:
-            driver.desire = LANE_CHANGE
-            self.road.set(lane, i + 1, driver) #Car moves forward by just 1 spot
-        self.road.set(lane, i, EMPTY)
+            x = self.road.safe_distance_within(lane, i, driver.speed + driver.safe_follow)
+            if x == driver.speed + driver.safe_follow:
+                self.road.set(lane, i + driver.speed, driver) #Car moves forward by full speed
+            elif x > driver.safe_follow:
+                driver.desire = LANE_CHANGE
+                self.road.set(lane, i + x - driver.safe_follow, driver) #Car moves forward just enough to maintain safe_distance
+            else:
+                driver.desire = LANE_CHANGE
+                self.road.set(lane, i + 1, driver) #Car moves forward by just 1 spot
+            self.road.set(lane, i, EMPTY)
 
     def gen_new_drivers(self):
         r = random.random()
         if r < CAR_PROBABILITY:
             r = random.random()
             if r < FAST_PROBABILITY:
-                self.road.set(LEFT, 0, Driver(FAST, self.current_step))
+                r = random.random()
+                if r < HUMAN_PROBABILITY:
+                    self.road.set(LEFT, 0, Driver(FAST, self.current_step, True))
             else:
-                self.road.set(LEFT, 0, Driver(SLOW, self.current_step))
+                r = random.random()
+                if r > HUMAN_PROBABILITY:
+                    self.road.set(LEFT, 0, Driver(SLOW, self.current_step, False))
         r = random.random()
         if r < CAR_PROBABILITY:
             r = random.random()
             if r < FAST_PROBABILITY:
-                self.road.set(RIGHT, 0, Driver(FAST, self.current_step))
+                r = random.random()
+                if r < HUMAN_PROBABILITY:
+                    self.road.set(RIGHT, 0, Driver(FAST, self.current_step, True))
             else:
-                self.road.set(RIGHT, 0, Driver(SLOW, self.current_step))
+                r = random.random()
+                if r > HUMAN_PROBABILITY:
+                    self.road.set(RIGHT, 0, Driver(SLOW, self.current_step, False))
 
     def average_time(self):
         return sum(self.data)/len(self.data)
