@@ -111,7 +111,7 @@ class Highway:
         
         s += "\n"
         
-        os.system("cls")
+        os.system("clear")
         print(s)
         time.sleep(0.02)
         
