@@ -181,14 +181,14 @@ class Simulation:
         return sum(self.data)/len(self.data)
 
 
-            
+def main ():
+    sim = Simulation(100)
+    sim.run()
+    print(sim.average_time())
 
 
-
-
-
-
-
+if __name__ == "__main__":
+    main()
 
 
 
