@@ -119,7 +119,7 @@ class Highway:
         
         s += "\n"
         
-        #os.system("clear")
+        os.system("clear")
         print(s)
         time.sleep(0.02)
         
@@ -210,12 +210,12 @@ class Simulation:
                     self.speed = driver.speed
             elif (lane == LEFT):
                 if self.road.get(RIGHT, i) != EMPTY:
-                    self.speed -= 1
+                    self.road.get(RIGHT, i).speed -= 1
                 else:
                     self.speed = driver.speed
         
             #behaviour: if there is a car in 2 distanc ebhind with a faster speed, make way for it by changing lanes
-            if (lane == LEFT):
+            elif (lane == LEFT):
                 driver_behind = self.road.get(LEFT, i-1)
             else:
                 driver_behind = self.road.get(RIGHT, i-1)
