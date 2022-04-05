@@ -25,7 +25,7 @@ RIGHT = 1
 CRUISE = "Cruise"
 LANE_CHANGE = "Lane Change"
 OFFSET = 5 #The last OFFSET indices of the road are not considered to avoid out of bounds errors
-CAR_PROBABILITY = 0.25
+CAR_PROBABILITY = 0.8
 FAST_PROBABILITY = 0.5
 HUMAN_PROBABILITY = 0.2
 IRREGULAR_PROBABILITY = 0.1
@@ -119,7 +119,7 @@ class Highway:
         
         s += "\n"
         
-        #os.system("clear")
+        os.system("clear")
         print(s)
         time.sleep(0.02)
         
